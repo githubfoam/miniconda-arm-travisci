@@ -1,0 +1,30 @@
+---
+os: linux
+arch: amd64
+dist: bionic
+language: generic
+sudo: required
+
+services:
+  - docker
+
+matrix:
+  fast_finish: true
+  include:
+
+    - name: "Python 3.7 on linux arm64"
+      os: linux
+      arch: amd64
+      dist: xenial
+      language: python
+      before_install:
+      - hostnamectl
+      install:
+      - sudo apt-get update
+      before_script: skip
+      script:
+        - sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
+        - "sudo docker build -t arm32v7/debian:stretch-slim-conda --file Dockerfile.arm32v7.conda ."
+      after_success:
+      - sudo docker run arm32v7/debian:stretch-slim-conda conda info
+      - sudo docker image ls
